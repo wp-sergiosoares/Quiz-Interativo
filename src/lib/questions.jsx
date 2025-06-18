@@ -17,4 +17,12 @@ export const questions = [
       { answerText: "Amarelo", isCorrect: false },
     ],
   },
+  {
+    questionText: "Qual a forma do Sol",
+    answerOptions: [
+      { answerText: "Triangular", isCorrect: true },
+      { answerText: "Quadrada", isCorrect: false },
+      { answerText: "Redonda", isCorrect: false },
+    ],
+  },
 ];

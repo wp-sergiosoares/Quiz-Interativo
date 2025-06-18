@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 
 import { questions } from "./lib/questions";
@@ -6,14 +6,55 @@ import { questions } from "./lib/questions";
 function App() {
   const [contador, setContador] = useState(1);
   const [resposta, setResposta] = useState([]);
+  const [pontuacao, setPontuacao] = useState(0);
+
+  const [respostaSelecionada, setRespostaSelecionada] = useState(null);
+
+  const [respostasCorretas, setRespostasCorretas] = useState([]);
 
   const handleSelected = (index) => {
-    alert(index);
+    // Atualiza a resposta selecionada visualmente (se ainda for útil para UI)
+    setRespostaSelecionada(index);
+
+    // Atualiza a lista de respostas
     const novaResposta = [...resposta];
-    novaResposta[contador - 1] = index; // salva a resposta da pergunta atual
+    novaResposta[contador - 1] = index;
     setResposta(novaResposta);
-    console.log(novaResposta);
+
+    console.log(resposta);
+
+    // Verifica se a resposta é correta
+    const isCorrect = questions[contador - 1].answerOptions[index].isCorrect;
+
+    if (isCorrect) {
+      // Evita pontuar duas vezes se o user voltar e clicar de novo
+      // Só pontua se ainda não tinha respondido corretamente essa pergunta
+      if (!respostasCorretas.includes(contador - 1)) {
+        setPontuacao(pontuacao + 1);
+        setRespostasCorretas([...respostasCorretas, contador - 1]);
+        console.log("pontuaçao: ", pontuacao);
+      }
+    } else {
+      // Se o user mudar de certa para errada, remove a pontuação
+      if (respostasCorretas.includes(contador - 1)) {
+        setPontuacao(pontuacao - 1);
+        setRespostasCorretas(
+          respostasCorretas.filter((i) => i !== contador - 1)
+        );
+      }
+    }
   };
+
+  useEffect(() => {
+    // Quando muda de pergunta, recupera a resposta anterior, se existir
+    setRespostaSelecionada(resposta[contador - 1] ?? null);
+  }, [contador]);
+
+  for (let i = 0; i < questions.length; i++) {
+    questions[i].answerOptions.filter((resposta) => {
+      resposta.isCorrect === true;
+    });
+  }
 
   return (
     <>
@@ -31,18 +72,18 @@ function App() {
               <div key={index}>
                 <button
                   onClick={() => handleSelected(index)}
-                  className="bg-amber-200 px-4 py-2 rounded-full text-lg cursor-pointer"
+                  className={`px-4 py-2 rounded-full text-lg cursor-pointer ${
+                    respostaSelecionada === index
+                      ? "bg-green-500"
+                      : "bg-amber-200"
+                  }`}
                 >
                   {resposta.answerText}
                 </button>
               </div>
             ))}
           </div>
-          <div>
-            {questions[0].answerOptions
-              ? questions[0].answerOptions[0].answerText
-              : "nao existe"}
-          </div>
+
           <div className="flex gap-2 items-center justify-center">
             <button
               onClick={() => {
